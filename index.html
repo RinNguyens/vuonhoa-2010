@@ -1,0 +1,1430 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<title>Vườn Hoa 20/10 🌸</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --rose: #ff6b8a;
+    --rose-2: #ff8fab;
+    --deep: #3d1220;
+    --cream: #fff4f6;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; overflow: hidden; touch-action: none; overscroll-behavior: none; }
+  body {
+    font-family: 'Baloo 2', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: #1a1030;
+    color: var(--cream);
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+  #c { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+
+  /* ---------- lớp phủ ---------- */
+  #vignette {
+    position: fixed; inset: 0; pointer-events: none; z-index: 2;
+    background: radial-gradient(ellipse at center, transparent 55%, rgba(20, 8, 24, 0.42) 100%);
+  }
+  #flash {
+    position: fixed; inset: 0; pointer-events: none; z-index: 15;
+    background: radial-gradient(ellipse at center, transparent 40%, rgba(255, 60, 80, 0.5) 100%);
+    opacity: 0; transition: opacity .12s;
+  }
+  #flash.on { opacity: 1; }
+
+  /* ---------- HUD ---------- */
+  #hud { position: fixed; inset: 0; z-index: 10; pointer-events: none; opacity: 0; transition: opacity .5s; }
+  #hud.show { opacity: 1; }
+  #hud .top {
+    position: absolute; top: 0; left: 0; right: 0;
+    padding: calc(10px + env(safe-area-inset-top)) 14px 0;
+    display: flex; flex-direction: column; gap: 8px; align-items: center;
+  }
+  #progressWrap {
+    width: min(420px, 78vw); height: 14px; border-radius: 999px;
+    background: rgba(30, 10, 24, 0.45); border: 1.5px solid rgba(255, 214, 226, 0.5);
+    position: relative; overflow: visible;
+  }
+  #progressFill {
+    height: 100%; width: 0%; border-radius: 999px;
+    background: linear-gradient(90deg, #ffb36b, #ff6b8a, #ff9ec6);
+    box-shadow: 0 0 10px rgba(255, 130, 165, 0.7);
+    transition: width .2s linear;
+  }
+  #progressFlower {
+    position: absolute; top: 50%; left: 0%; transform: translate(-40%, -54%);
+    font-size: 20px; filter: drop-shadow(0 2px 3px rgba(0,0,0,.4));
+    transition: left .2s linear; line-height: 1;
+  }
+  #stats {
+    display: flex; gap: 10px; align-items: center;
+    font-weight: 800; font-size: 19px; text-shadow: 0 2px 4px rgba(0,0,0,.45);
+  }
+  #flowerCount { background: rgba(30,10,24,.42); padding: 2px 14px; border-radius: 999px; border: 1.5px solid rgba(255,214,226,.4); }
+  #comboBadge {
+    color: #ffd76b; opacity: 0; transform: scale(.6); transition: all .18s;
+    text-shadow: 0 0 8px rgba(255, 200, 80, .8), 0 2px 4px rgba(0,0,0,.5);
+  }
+  #comboBadge.on { opacity: 1; transform: scale(1); }
+
+  /* ---------- nút nhạc ---------- */
+  #muteBtn {
+    position: fixed; z-index: 40; top: calc(10px + env(safe-area-inset-top)); right: 12px;
+    width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid rgba(255,214,226,.5);
+    background: rgba(30,10,24,.5); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    font-size: 20px; cursor: pointer; color: var(--cream);
+    display: flex; align-items: center; justify-content: center;
+  }
+  #muteBtn:active { transform: scale(.92); }
+
+  /* ---------- lời chúc giữa màn hình ---------- */
+  #msg {
+    position: fixed; z-index: 12; left: 50%; top: 34%; transform: translate(-50%, -50%);
+    width: min(560px, 88vw); text-align: center; pointer-events: none;
+    font-size: clamp(20px, 5.4vw, 30px); font-weight: 800; line-height: 1.35;
+    color: #fff; opacity: 0;
+    text-shadow: 0 0 14px rgba(255, 130, 170, .9), 0 2px 6px rgba(0,0,0,.55);
+  }
+  #msg.show { animation: msgIn 3.6s ease forwards; }
+  @keyframes msgIn {
+    0% { opacity: 0; transform: translate(-50%, -46%) scale(.92); }
+    12% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    82% { opacity: 1; }
+    100% { opacity: 0; transform: translate(-50%, -56%) scale(1.02); }
+  }
+
+  /* ---------- hiệu ứng +1 ---------- */
+  #fx { position: fixed; inset: 0; z-index: 5; pointer-events: none; overflow: hidden; }
+  .floaty {
+    position: absolute; left: 50%; top: 60%; font-weight: 800;
+    font-size: clamp(18px, 4.6vw, 24px); color: #ffd76b;
+    text-shadow: 0 0 8px rgba(255,190,90,.9), 0 2px 4px rgba(0,0,0,.5);
+    animation: floatUp .9s ease-out forwards;
+  }
+  @keyframes floatUp {
+    0% { opacity: 0; transform: translate(-50%, 0) scale(.7); }
+    18% { opacity: 1; transform: translate(-50%, -18px) scale(1.15); }
+    100% { opacity: 0; transform: translate(-50%, -74px) scale(1); }
+  }
+
+  /* ---------- màn mở đầu ---------- */
+  #intro {
+    position: fixed; inset: 0; z-index: 20;
+    display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+    padding: 20px 20px calc(30px + env(safe-area-inset-bottom));
+    background: linear-gradient(to bottom, rgba(25, 10, 32, 0) 30%, rgba(25, 10, 32, .78) 78%);
+    transition: opacity .6s;
+  }
+  #intro.hide { opacity: 0; pointer-events: none; }
+  .introTitle {
+    font-size: clamp(34px, 9vw, 56px); font-weight: 800; text-align: center; line-height: 1.1;
+    background: linear-gradient(180deg, #fff, #ffc9d9);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 3px 8px rgba(0,0,0,.5));
+    margin-bottom: 4px;
+  }
+  .introSub { text-align: center; font-size: clamp(15px, 3.8vw, 18px); color: #ffd9e4; margin-bottom: 18px; text-shadow: 0 2px 4px rgba(0,0,0,.5); }
+  .card {
+    width: min(400px, 92vw); background: rgba(46, 16, 34, 0.66);
+    border: 1.5px solid rgba(255, 200, 218, 0.35); border-radius: 22px;
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    padding: 18px 18px 16px; box-shadow: 0 12px 40px rgba(0,0,0,.45);
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .card label { font-size: 15px; font-weight: 700; color: #ffd0dd; }
+  #nameInput {
+    width: 100%; font-family: inherit; font-size: 19px; font-weight: 700; text-align: center;
+    padding: 11px 14px; border-radius: 14px; color: #fff;
+    border: 1.5px solid rgba(255, 200, 218, 0.45); background: rgba(20, 6, 18, 0.55);
+    outline: none; transition: border .2s, box-shadow .2s;
+  }
+  #nameInput:focus { border-color: var(--rose); box-shadow: 0 0 0 3px rgba(255, 107, 138, .25); }
+  #nameInput::placeholder { color: rgba(255, 214, 226, 0.45); }
+  #nameInput.err { border-color: #ff4d6d; box-shadow: 0 0 0 3px rgba(255, 77, 109, 0.22); }
+  #nameErr { min-height: 18px; font-size: 13px; font-weight: 700; color: #ffa7bb; text-align: center; }
+  .card.shake { animation: shake .4s; }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-9px); } 40% { transform: translateX(8px); }
+    60% { transform: translateX(-5px); } 80% { transform: translateX(4px); }
+  }
+  #startBtn {
+    font-family: inherit; font-size: 21px; font-weight: 800; letter-spacing: .3px;
+    padding: 13px; border: none; border-radius: 16px; cursor: pointer; color: #fff;
+    background: linear-gradient(135deg, #ff5d8f, #ff8fab);
+    box-shadow: 0 6px 18px rgba(255, 93, 143, .45), inset 0 1px 0 rgba(255,255,255,.35);
+    transition: transform .12s;
+  }
+  #startBtn:active { transform: scale(.96); }
+  .hint { font-size: 13px; color: rgba(255, 214, 226, .8); text-align: center; line-height: 1.5; }
+  .credit { margin-top: 10px; font-size: 12px; color: rgba(255, 214, 226, .55); text-align: center; }
+
+  /* cánh hoa rơi ở màn mở đầu */
+  .petal {
+    position: absolute; top: -30px; font-size: 18px; opacity: 0;
+    animation: petalFall linear infinite; pointer-events: none;
+  }
+  @keyframes petalFall {
+    0% { opacity: 0; transform: translateY(-4vh) translateX(0) rotate(0deg); }
+    10% { opacity: .9; }
+    100% { opacity: 0; transform: translateY(108vh) translateX(14vw) rotate(310deg); }
+  }
+
+  /* ---------- màn kết ---------- */
+  #finale {
+    position: fixed; inset: 0; z-index: 18; pointer-events: none;
+    display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+    padding: 20px 20px calc(26px + env(safe-area-inset-bottom));
+    background: linear-gradient(to bottom, rgba(10, 6, 26, 0) 42%, rgba(10, 6, 26, .82) 82%);
+    opacity: 0; transition: opacity 1.2s;
+  }
+  #finale.show { opacity: 1; pointer-events: auto; }
+  #finaleLines {
+    width: min(600px, 92vw); text-align: center; margin-bottom: 16px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  #finaleLines p { font-size: clamp(17px, 4.4vw, 23px); font-weight: 700; line-height: 1.4; text-shadow: 0 2px 8px rgba(0,0,0,.7); min-height: 1.4em; }
+  #finaleLines p.big { font-size: clamp(23px, 6vw, 34px); font-weight: 800; color: #ffd9e4;
+    text-shadow: 0 0 16px rgba(255, 130, 170, .95), 0 2px 8px rgba(0,0,0,.7); }
+  #finaleLines p .caret { animation: caret 1s steps(1) infinite; }
+  @keyframes caret { 50% { opacity: 0; } }
+  .btnRow { display: flex; gap: 12px; width: min(480px, 92vw); }
+  .btn {
+    flex: 1; font-family: inherit; font-size: 18px; font-weight: 800; padding: 13px 10px;
+    border-radius: 16px; cursor: pointer; color: #fff; border: none;
+    background: linear-gradient(135deg, #ff5d8f, #ff8fab);
+    box-shadow: 0 6px 18px rgba(255, 93, 143, .4);
+    transition: transform .12s, opacity .6s;
+  }
+  .btn.ghost { background: rgba(255, 255, 255, 0.12); border: 1.5px solid rgba(255, 214, 226, 0.5); box-shadow: none; }
+  .btn:active { transform: scale(.96); }
+  #finaleBtns { opacity: 0; pointer-events: none; transition: opacity .8s; }
+  #finaleBtns.show { opacity: 1; pointer-events: auto; }
+
+  /* ---------- toast ---------- */
+  #toast {
+    position: fixed; z-index: 30; left: 50%; bottom: calc(28px + env(safe-area-inset-bottom));
+    transform: translate(-50%, 20px); opacity: 0; transition: all .3s;
+    background: rgba(46, 16, 34, 0.9); border: 1.5px solid rgba(255, 200, 218, 0.5);
+    color: var(--cream); font-weight: 700; font-size: 15px;
+    padding: 10px 18px; border-radius: 999px; max-width: 88vw; text-align: center;
+  }
+  #toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  #fallback {
+    display: none; position: fixed; inset: 0; z-index: 99;
+    align-items: center; justify-content: center; text-align: center; padding: 30px;
+    background: #241030; font-size: 17px; line-height: 1.6;
+  }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="vignette"></div>
+<div id="flash"></div>
+<div id="fx"></div>
+
+<div id="hud">
+  <div class="top">
+    <div id="progressWrap">
+      <div id="progressFill"></div>
+      <div id="progressFlower">🌸</div>
+    </div>
+    <div id="stats">
+      <div id="flowerCount">🌹 <span id="flowerNum">0</span></div>
+      <div id="comboBadge">x2 🔥</div>
+    </div>
+  </div>
+</div>
+
+<button id="muteBtn" type="button" title="Bật/tắt nhạc">🔊</button>
+<div id="msg"></div>
+
+<div id="intro">
+  <div id="petals"></div>
+  <div class="introTitle">Vườn Hoa 🌸 20/10</div>
+  <div class="introSub">Một món quà nhỏ tự làm 🎁 — chạy qua vườn hoa, hái một bó hoa dành tặng em</div>
+  <div class="card">
+    <label for="nameInput">Lời chúc này gửi đến…</label>
+    <input id="nameInput" type="text" maxlength="24" placeholder="Tên người ấy…" autocomplete="off" />
+    <div id="nameErr"></div>
+    <button id="startBtn" type="button">🌸 Bắt đầu</button>
+    <div class="hint">
+      📱 Chạm bên trái / phải để đổi làn — chạm giữa hoặc vuốt lên để nhảy<br />
+      🖥️ Phím ← → (hoặc A D) đổi làn — Space / ↑ để nhảy
+    </div>
+  </div>
+  <div class="credit">Made with ❤️ &amp; Three.js — 20/10</div>
+</div>
+
+<div id="finale">
+  <div id="finaleLines"></div>
+  <div class="btnRow" id="finaleBtns">
+    <button class="btn ghost" id="shareBtn" type="button">💌 Gửi lời chúc</button>
+    <button class="btn" id="replayBtn" type="button">🌸 Chơi lại</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+<div id="fallback">😢 Trình duyệt không hỗ trợ WebGL.<br />Hãy thử mở bằng Chrome hoặc Safari phiên bản mới nhé.</div>
+
+<script type="module">
+import * as THREE from 'three';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+
+/* ============================================================
+   ✏️ SỬA LỜI CHÚC TẠI ĐÂY — {ten} sẽ được thay bằng tên đã nhập
+   ============================================================ */
+const MESSAGES = [
+  'Gửi {ten} — người con gái tuyệt vời nhất 💐',
+  'Cảm ơn em vì đã luôn ở bên anh',
+  'Nụ cười của em là bông hoa đẹp nhất vườn',
+  'Mong mọi điều em ước đều nở hoa',
+  'Chúc em luôn xinh, luôn vui, luôn khỏe',
+  'Và anh sẽ luôn là người chạy đến bên em đầu tiên',
+  'Vườn hoa này dành toàn bộ cho em…',
+];
+const FINALE_LINES = [
+  { text: 'Chúc mừng ngày Phụ nữ Việt Nam 20/10,', big: false },
+  { text: '{ten}! ❤', big: true },
+  { text: 'Cảm ơn em vì tất cả.', big: false },
+  { text: 'Mong mọi điều em ước đều nở hoa.', big: false },
+  { text: 'Yêu em nhiều lắm 🌹', big: true },
+];
+
+/* ---------------- CẤU HÌNH ---------------- */
+const LANES = [-2.4, 0, 2.4];
+// chỉ 2 tên này được vào game (không phân biệt hoa/thường, có/không dấu)
+const ALLOWED_NAMES = { 'my': 'Mỹ', 'kitty': 'Kitty' };
+const normName = (s) => s.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '');
+const qs = new URLSearchParams(location.search);
+const FAST = qs.has('fast'); // chế độ test: chạy nhanh tới đoạn kết
+const TOTAL_DIST = FAST ? 130 : 1150;   // mét ảo (~90s)
+const MILESTONES = [0.05, 0.19, 0.32, 0.46, 0.60, 0.74];
+const SPAWN_AHEAD = 165, DESPAWN_Z = 12;
+
+/* ---------------- TIỆN ÍCH ---------------- */
+const $ = (s) => document.querySelector(s);
+const rand = (a, b) => a + Math.random() * (b - a);
+const randi = (a, b) => Math.floor(rand(a, b + 1));
+const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const smooth = (a, b, x) => { const t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
+
+function tint(geo, hex) {
+  const c = new THREE.Color(hex);
+  const n = geo.attributes.position.count;
+  const arr = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) { arr[i * 3] = c.r; arr[i * 3 + 1] = c.g; arr[i * 3 + 2] = c.b; }
+  geo.setAttribute('color', new THREE.BufferAttribute(arr, 3));
+  return geo;
+}
+const M = (...geos) => mergeGeometries(geos, false);
+const BOX = (w, h, d) => new THREE.BoxGeometry(w, h, d);
+const SPH = (r, a = 10, b = 8) => new THREE.SphereGeometry(r, a, b);
+const CYL = (rt, rb, h, s = 10) => new THREE.CylinderGeometry(rt, rb, h, s);
+const CONE = (r, h, s = 8) => new THREE.ConeGeometry(r, h, s);
+
+/* ---------------- RENDERER / SCENE ---------------- */
+let renderer;
+try {
+  renderer = new THREE.WebGLRenderer({ canvas: $('#c'), antialias: true, powerPreference: 'high-performance' });
+} catch (e) {
+  $('#fallback').style.display = 'flex';
+  throw e;
+}
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.Fog(0xf09a72, 30, 140);
+
+const camera = new THREE.PerspectiveCamera(62, innerWidth / innerHeight, 0.1, 700);
+const CAM_BASE = new THREE.Vector3(0, 4.4, 7.6);
+const CAM_LOOK = new THREE.Vector3(0, 1.5, -8);
+camera.position.copy(CAM_BASE);
+camera.lookAt(CAM_LOOK);
+
+const hemi = new THREE.HemisphereLight(0xffd9b0, 0x6b5a4a, 0.95);
+scene.add(hemi);
+const dir = new THREE.DirectionalLight(0xffbe8a, 1.5);
+dir.position.set(-50, 60, -30);
+scene.add(dir);
+
+const MAT = {
+  vcolor: new THREE.MeshLambertMaterial({ vertexColors: true }),
+  grass: new THREE.MeshLambertMaterial({ color: 0x4f7d52 }),
+  path: new THREE.MeshLambertMaterial({ color: 0xcdb59c }),
+  trunk: new THREE.MeshLambertMaterial({ color: 0x6b4a33 }),
+  canopy: new THREE.MeshLambertMaterial({ color: 0xffffff }),
+  stem: new THREE.MeshLambertMaterial({ color: 0x3d7a45 }),
+  flowerHead: new THREE.MeshLambertMaterial({ color: 0xffffff }),
+  slab: new THREE.MeshLambertMaterial({ color: 0xffffff }),
+  post: new THREE.MeshLambertMaterial({ color: 0x3a2f2a }),
+  lantern: new THREE.MeshLambertMaterial({ color: 0x5a4033, emissive: 0xffc46b, emissiveIntensity: 0 }),
+};
+
+const CANOPY_COLORS = [0x5c8f57, 0x6da05e, 0x4d7a4a, 0x7fae6a, 0x8fae57].map((h) => new THREE.Color(h));
+const FLOWER_COLORS = [0xff7fa8, 0xff5d8f, 0xffd3e0, 0xffb3c6, 0xffe9a0, 0xffffff, 0xff8fb3].map((h) => new THREE.Color(h));
+
+/* ---------------- BẦU TRỜI ---------------- */
+const skyMat = new THREE.ShaderMaterial({
+  uniforms: { cTop: { value: new THREE.Color(0x4b4e8f) }, cBot: { value: new THREE.Color(0xff9d70) } },
+  vertexShader: `varying float vy; void main(){ vy = normalize(position).y; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
+  fragmentShader: `uniform vec3 cTop; uniform vec3 cBot; varying float vy;
+    void main(){ float t = smoothstep(-0.05, 0.55, vy); gl_FragColor = vec4(mix(cBot, cTop, t), 1.0); }`,
+  side: THREE.BackSide, depthWrite: false, fog: false,
+});
+const sky = new THREE.Mesh(new THREE.SphereGeometry(320, 24, 12), skyMat);
+scene.add(sky);
+
+const sun = new THREE.Mesh(new THREE.CircleGeometry(26, 24), new THREE.MeshBasicMaterial({ color: 0xffb25e, fog: false, transparent: true, opacity: 1 }));
+sun.position.set(-80, 28, -280); scene.add(sun);
+const sunGlow = new THREE.Mesh(new THREE.CircleGeometry(52, 24), new THREE.MeshBasicMaterial({ color: 0xff8a4e, fog: false, transparent: true, opacity: 0.25, blending: THREE.AdditiveBlending, depthWrite: false }));
+sunGlow.position.set(-80, 28, -281); scene.add(sunGlow);
+const moon = new THREE.Mesh(new THREE.CircleGeometry(15, 24), new THREE.MeshBasicMaterial({ color: 0xf4f7ff, fog: false, transparent: true, opacity: 0 }));
+moon.position.set(95, 80, -260); scene.add(moon);
+const moonHalo = new THREE.Mesh(new THREE.CircleGeometry(30, 24), new THREE.MeshBasicMaterial({ color: 0xa8c4ff, fog: false, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false }));
+moonHalo.position.set(95, 80, -261); scene.add(moonHalo);
+
+// sao đêm
+{
+  const n = 700, pos = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) {
+    const th = rand(0, Math.PI * 2), ph = rand(0.12, 1.35), r = 300;
+    pos[i * 3] = r * Math.sin(ph) * Math.cos(th);
+    pos[i * 3 + 1] = r * Math.cos(ph) * 0.9 + 20;
+    pos[i * 3 + 2] = r * Math.sin(ph) * Math.sin(th);
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  var stars = new THREE.Points(g, new THREE.PointsMaterial({ color: 0xffffff, size: 1.6, sizeAttenuation: false, transparent: true, opacity: 0, fog: false, depthWrite: false }));
+  stars.frustumCulled = false; scene.add(stars);
+}
+
+// đom đóm
+const FIRE_N = 200;
+const fireflies = { base: [], geo: new THREE.BufferGeometry() };
+{
+  const pos = new Float32Array(FIRE_N * 3);
+  for (let i = 0; i < FIRE_N; i++) {
+    const p = [rand(-13, 13), rand(0.4, 3.4), rand(-70, 6)];
+    fireflies.base.push({ x: p[0], y: p[1], z: p[2], ph: rand(0, 9), sp: rand(0.6, 1.6) });
+    pos.set(p, i * 3);
+  }
+  fireflies.geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  fireflies.pts = new THREE.Points(fireflies.geo, new THREE.PointsMaterial({ color: 0xffe9a0, size: 0.16, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, fog: false }));
+  fireflies.pts.frustumCulled = false; scene.add(fireflies.pts);
+}
+
+/* ---------------- MẶT ĐẤT ---------------- */
+{
+  const grass = new THREE.Mesh(new THREE.PlaneGeometry(90, 340), MAT.grass);
+  grass.rotation.x = -Math.PI / 2; grass.position.set(0, 0, -140); scene.add(grass);
+  const path = new THREE.Mesh(new THREE.PlaneGeometry(8.8, 340), MAT.path);
+  path.rotation.x = -Math.PI / 2; path.position.set(0, 0.02, -140); scene.add(path);
+}
+
+/* ---------------- KHỐI CẢNH VẬT (leapfrog 2 chunk) ---------------- */
+const CHUNK_LEN = 120;
+const dummy = new THREE.Object3D();
+function buildChunk() {
+  const g = new THREE.Group();
+  const NT = 24, NB = NT * 3, NF = 190, NS = 26, NL = 10;
+  const trunkIM = new THREE.InstancedMesh(CYL(0.12, 0.18, 1.6, 6), MAT.trunk, NT);
+  const canopyIM = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.95, 0), MAT.canopy, NB);
+  const headIM = new THREE.InstancedMesh(SPH(0.09, 6, 5), MAT.flowerHead, NF);
+  const stemIM = new THREE.InstancedMesh(CYL(0.015, 0.02, 0.32, 4), MAT.stem, NF);
+  const slabIM = new THREE.InstancedMesh(BOX(2.3, 0.05, 1.25), MAT.slab, NS);
+  const postIM = new THREE.InstancedMesh(CYL(0.05, 0.07, 2.4, 6), MAT.post, NL);
+  const lantIM = new THREE.InstancedMesh(SPH(0.17, 8, 6), MAT.lantern, NL);
+  [trunkIM, canopyIM, headIM, stemIM, slabIM, postIM, lantIM].forEach((m) => (m.frustumCulled = false));
+
+  for (let i = 0; i < NT; i++) {
+    const side = Math.random() < 0.5 ? -1 : 1;
+    const x = side * rand(5.4, 15), z = -rand(2, CHUNK_LEN - 2), s = rand(0.8, 1.7);
+    dummy.position.set(x, 0.8 * s, z); dummy.scale.setScalar(s); dummy.rotation.set(0, rand(0, 6), 0);
+    dummy.updateMatrix(); trunkIM.setMatrixAt(i, dummy.matrix);
+    for (let j = 0; j < 3; j++) {
+      const k = i * 3 + j;
+      dummy.position.set(x + rand(-0.9, 0.9) * s, (1.75 + rand(0, 0.75)) * s, z + rand(-0.9, 0.9) * s);
+      dummy.scale.setScalar(s * rand(0.75, 1.35)); dummy.rotation.set(rand(0, 3), rand(0, 3), 0);
+      dummy.updateMatrix(); canopyIM.setMatrixAt(k, dummy.matrix);
+      canopyIM.setColorAt(k, pick(CANOPY_COLORS));
+    }
+  }
+  for (let i = 0; i < NF; i++) {
+    const side = Math.random() < 0.5 ? -1 : 1;
+    const x = side * rand(4.7, 7.4), z = -rand(0, CHUNK_LEN), s = rand(0.7, 1.4);
+    dummy.rotation.set(0, 0, 0);
+    dummy.position.set(x, 0.16 * s, z); dummy.scale.setScalar(s); dummy.updateMatrix(); stemIM.setMatrixAt(i, dummy.matrix);
+    dummy.position.set(x, 0.34 * s, z); dummy.updateMatrix(); headIM.setMatrixAt(i, dummy.matrix);
+    headIM.setColorAt(i, pick(FLOWER_COLORS));
+  }
+  for (let i = 0; i < NS; i++) {
+    dummy.position.set(rand(-2.8, 2.8), 0.035, -i * (CHUNK_LEN / NS) - rand(0, 2));
+    dummy.rotation.set(0, rand(-0.12, 0.12), 0); dummy.scale.set(rand(0.85, 1.15), 1, rand(0.9, 1.1));
+    dummy.updateMatrix(); slabIM.setMatrixAt(i, dummy.matrix);
+    const c = new THREE.Color(0xb9a68d).offsetHSL(0, rand(-0.03, 0.03), rand(-0.06, 0.06));
+    slabIM.setColorAt(i, c);
+  }
+  for (let i = 0; i < NL; i++) {
+    const side = i % 2 === 0 ? -1 : 1;
+    const x = side * 5.05, z = -10 - i * (CHUNK_LEN / NL);
+    dummy.rotation.set(0, 0, 0); dummy.scale.setScalar(1);
+    dummy.position.set(x, 1.2, z); dummy.updateMatrix(); postIM.setMatrixAt(i, dummy.matrix);
+    dummy.position.set(x, 2.5, z); dummy.updateMatrix(); lantIM.setMatrixAt(i, dummy.matrix);
+  }
+  [canopyIM, headIM, slabIM].forEach((m) => m.instanceColor.needsUpdate = true);
+  g.add(trunkIM, canopyIM, headIM, stemIM, slabIM, postIM, lantIM);
+  return g;
+}
+const chunkA = buildChunk(), chunkB = buildChunk();
+chunkA.position.z = 0; chunkB.position.z = -CHUNK_LEN;
+scene.add(chunkA, chunkB);
+
+/* ---------------- NHÂN VẬT ---------------- */
+const player = new THREE.Group();
+scene.add(player);
+const rig = new THREE.Group(); player.add(rig);
+let legL, legR, armL, armR;
+{
+  const skin = 0xf2c59b, shirt = 0xfdfdfd, pants = 0x3a5a7a, dark = 0x2c2320;
+  // chân
+  const legGeo = M(
+    tint(BOX(0.16, 0.78, 0.18), pants).translate(0, -0.4, 0),
+    tint(BOX(0.18, 0.12, 0.3), dark).translate(0, -0.76, 0.05),
+  );
+  legL = new THREE.Mesh(legGeo, MAT.vcolor); legL.position.set(0.11, 0.86, 0);
+  legR = new THREE.Mesh(legGeo, MAT.vcolor); legR.position.set(-0.11, 0.86, 0);
+  // thân + ba lô + hoa cài ngực
+  const torsoGeo = M(
+    tint(BOX(0.5, 0.62, 0.3), shirt).translate(0, 1.17, 0),
+    tint(BOX(0.36, 0.42, 0.18), 0xb97a54).translate(0, 1.18, 0.24),
+    tint(BOX(0.4, 0.1, 0.26), pants).translate(0, 0.88, 0),
+    tint(SPH(0.06, 6, 5), 0xe8395a).translate(0.15, 1.32, 0.17),
+  );
+  const torso = new THREE.Mesh(torsoGeo, MAT.vcolor);
+  // tay
+  const armGeo = M(
+    tint(BOX(0.12, 0.5, 0.14), shirt).translate(0, -0.22, 0),
+    tint(SPH(0.075, 6, 5), skin).translate(0, -0.5, 0),
+  );
+  armL = new THREE.Mesh(armGeo, MAT.vcolor); armL.position.set(0.32, 1.42, 0);
+  armR = new THREE.Mesh(armGeo, MAT.vcolor); armR.position.set(-0.32, 1.42, 0);
+  // đầu + tóc (mặt hướng -z, ba lô quay về phía camera)
+  const head = new THREE.Group();
+  head.add(new THREE.Mesh(tint(SPH(0.19, 12, 10), skin), MAT.vcolor));
+  const hair = new THREE.Mesh(tint(SPH(0.2, 10, 8), dark), MAT.vcolor);
+  hair.scale.set(1, 0.95, 1.02); hair.position.set(0, 0.055, 0.045);
+  const fringe = new THREE.Mesh(tint(BOX(0.3, 0.09, 0.12), dark), MAT.vcolor);
+  fringe.position.set(0, 0.13, -0.13);
+  head.add(hair, fringe);
+  head.position.set(0, 1.74, 0);
+  rig.add(legL, legR, torso, armL, armR, head);
+}
+// bóng đổ giả
+const blob = new THREE.Mesh(new THREE.CircleGeometry(0.55, 18), new THREE.MeshBasicMaterial({ color: 0x1a0e14, transparent: true, opacity: 0.35 }));
+blob.rotation.x = -Math.PI / 2; blob.position.y = 0.04; scene.add(blob);
+
+/* ---------------- BÓ HOA (vật phẩm + bó lớn cuối) ---------------- */
+function bouquetGeo() {
+  const parts = [
+    tint(CONE(0.17, 0.32, 8), 0xf7e6c9).translate(0, 0.16, 0), // giấy gói
+    tint(SPH(0.05, 6, 5), 0x3d7a45).translate(0.13, 0.2, 0.05),
+    tint(SPH(0.05, 6, 5), 0x3d7a45).translate(-0.12, 0.2, -0.04),
+  ];
+  const roseCols = [0xe8395a, 0xff7fa8, 0xffb3c6];
+  const rosPos = [[0, 0.42, 0], [0.1, 0.36, 0.06], [-0.1, 0.36, 0.05], [0.05, 0.36, -0.09], [-0.06, 0.37, -0.08], [0, 0.5, 0.01]];
+  rosPos.forEach((p, i) => parts.push(tint(SPH(0.1 - (i % 3) * 0.008, 8, 6), roseCols[i % 3]).translate(p[0], p[1], p[2])));
+  return M(...parts);
+}
+const BOUQ_GEO = bouquetGeo();
+
+/* ---------------- CHƯỞNG NGẠI ---------------- */
+function benchGeo() {
+  return M(
+    tint(BOX(1.7, 0.09, 0.55), 0x8a5a35).translate(0, 0.46, 0),
+    tint(BOX(1.7, 0.5, 0.08), 0x96653c).translate(0, 0.76, 0.26),
+    tint(BOX(0.09, 0.45, 0.45), 0x5f3f28).translate(0.72, 0.23, 0),
+    tint(BOX(0.09, 0.45, 0.45), 0x5f3f28).translate(-0.72, 0.23, 0),
+  );
+}
+function planterGeo() {
+  const parts = [
+    tint(CYL(0.5, 0.36, 0.55, 10), 0xb5603f).translate(0, 0.28, 0),
+    tint(CYL(0.46, 0.46, 0.07, 10), 0x4a3325).translate(0, 0.57, 0),
+    tint(SPH(0.42, 8, 6), 0x5c8f57).translate(0, 0.88, 0),
+    tint(SPH(0.3, 7, 5), 0x6da05e).translate(0.28, 0.75, 0.12),
+    tint(SPH(0.07, 6, 5), 0xff5d8f).translate(0.1, 1.12, 0.15),
+    tint(SPH(0.07, 6, 5), 0xffd3e0).translate(-0.2, 1.05, -0.1),
+  ];
+  return M(...parts);
+}
+function bushGeo() {
+  const parts = [
+    tint(SPH(0.58, 8, 6), 0x4d7a4a).translate(0, 0.52, 0),
+    tint(SPH(0.45, 7, 5), 0x5c8f57).translate(0.5, 0.42, 0.1),
+    tint(SPH(0.5, 7, 5), 0x6da05e).translate(-0.48, 0.45, -0.05),
+  ];
+  for (let i = 0; i < 6; i++) parts.push(tint(SPH(0.08, 6, 5), pick([0xff5d8f, 0xff7fa8, 0xffffff])).translate(rand(-0.7, 0.7), rand(0.55, 1.0), rand(-0.4, 0.4)));
+  return M(...parts);
+}
+
+/* ---------------- POOL ĐỐI TƯỢNG ---------------- */
+function makePool(n, geoFactory, meta) {
+  const items = [];
+  for (let i = 0; i < n; i++) {
+    const mesh = new THREE.Mesh(geoFactory(), MAT.vcolor);
+    mesh.visible = false; scene.add(mesh);
+    items.push({ mesh, active: false, ...meta });
+  }
+  return items;
+}
+const obstacles = [
+  ...makePool(4, benchGeo, { kind: 'bench', halfW: 0.95, halfD: 0.45, clearY: 0.85 }),
+  ...makePool(5, planterGeo, { kind: 'planter', halfW: 0.62, halfD: 0.55, clearY: 0.85 }),
+  ...makePool(5, bushGeo, { kind: 'bush', halfW: 0.95, halfD: 0.5, clearY: 1.05 }),
+];
+const bouquets = makePool(22, () => BOUQ_GEO, {});
+
+function acquire(pool, filter) {
+  const cands = filter ? pool.filter(filter) : pool;
+  for (const it of cands) if (!it.active) return it;
+  return null;
+}
+function release(it) { it.active = false; it.mesh.visible = false; }
+
+/* ---------------- CỔNG HOA & BÓ HOA LỚN (đoạn kết) ---------------- */
+const arch = new THREE.Group();
+{
+  const parts = [
+    tint(CYL(0.09, 0.11, 3.1, 8), 0x3d7a45).translate(2.7, 1.55, 0),
+    tint(CYL(0.09, 0.11, 3.1, 8), 0x3d7a45).translate(-2.7, 1.55, 0),
+  ];
+  for (let i = 0; i <= 22; i++) {
+    const th = 0.18 + (Math.PI - 0.36) * (i / 22);
+    const x = 2.7 * Math.cos(th), y = 0.15 + 2.7 * Math.sin(th);
+    parts.push(tint(SPH(rand(0.13, 0.19), 7, 5), pick([0xe8395a, 0xff7fa8, 0xffb3c6])).translate(x, y, 0));
+    if (i % 3 === 0) parts.push(tint(SPH(0.07, 5, 4), 0x5c8f57).translate(x * 1.04, y + 0.12, 0.05));
+  }
+  arch.add(new THREE.Mesh(M(...parts), MAT.vcolor));
+  arch.position.set(0, 0, -10);
+  arch.visible = false;
+  scene.add(arch);
+}
+const bigBouquet = new THREE.Mesh(BOUQ_GEO, MAT.vcolor);
+bigBouquet.scale.setScalar(0.01); bigBouquet.visible = false;
+bigBouquet.position.set(0, 1.7, -4.6); scene.add(bigBouquet);
+
+/* ---------------- HẠT (particle pools) ---------------- */
+class ParticlePool {
+  constructor(n, additive) {
+    this.n = n; this.free = []; this.live = new Set();
+    this.pos = new Float32Array(n * 3); this.vel = new Float32Array(n * 3);
+    this.col = new Float32Array(n * 3); this.size = new Float32Array(n);
+    this.alpha = new Float32Array(n); this.life = new Float32Array(n); this.maxLife = new Float32Array(n);
+    this.grav = new Float32Array(n); this.damp = new Float32Array(n);
+    for (let i = n - 1; i >= 0; i--) this.free.push(i);
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(this.pos, 3));
+    g.setAttribute('aColor', new THREE.BufferAttribute(this.col, 3));
+    g.setAttribute('aSize', new THREE.BufferAttribute(this.size, 1));
+    g.setAttribute('aAlpha', new THREE.BufferAttribute(this.alpha, 1));
+    this.geo = g;
+    this.mat = new THREE.ShaderMaterial({
+      transparent: true, depthWrite: false,
+      blending: additive ? THREE.AdditiveBlending : THREE.NormalBlending,
+      uniforms: { uPx: { value: renderer.getPixelRatio() } },
+      vertexShader: `attribute vec3 aColor; attribute float aSize; attribute float aAlpha;
+        varying vec3 vC; varying float vA; uniform float uPx;
+        void main(){ vC = aColor; vA = aAlpha;
+          vec4 mv = modelViewMatrix * vec4(position, 1.0);
+          gl_PointSize = aSize * uPx * (240.0 / max(1.0, -mv.z));
+          gl_Position = projectionMatrix * mv; }`,
+      fragmentShader: `varying vec3 vC; varying float vA;
+        void main(){ vec2 d = gl_PointCoord - 0.5; float r = length(d);
+          float a = smoothstep(0.5, 0.12, r) * vA;
+          if (a < 0.012) discard;
+          gl_FragColor = vec4(vC, a); }`,
+    });
+    this.points = new THREE.Points(g, this.mat);
+    this.points.frustumCulled = false; scene.add(this.points);
+  }
+  spawn(x, y, z, vx, vy, vz, r, g, b, size, life, grav = 0, damp = 1) {
+    if (!this.free.length) return;
+    const i = this.free.pop(); this.live.add(i);
+    this.pos.set([x, y, z], i * 3); this.vel.set([vx, vy, vz], i * 3);
+    this.col.set([r, g, b], i * 3);
+    this.size[i] = size; this.life[i] = life; this.maxLife[i] = life;
+    this.alpha[i] = 1; this.grav[i] = grav; this.damp[i] = damp;
+  }
+  update(dt) {
+    for (const i of this.live) {
+      this.life[i] -= dt;
+      if (this.life[i] <= 0) { this.alpha[i] = 0; this.free.push(i); this.live.delete(i); continue; }
+      const i3 = i * 3, dp = Math.pow(this.damp[i], dt * 60);
+      this.vel[i3] *= dp; this.vel[i3 + 1] = this.vel[i3 + 1] * dp - this.grav[i] * dt; this.vel[i3 + 2] *= dp;
+      this.pos[i3] += this.vel[i3] * dt; this.pos[i3 + 1] += this.vel[i3 + 1] * dt; this.pos[i3 + 2] += this.vel[i3 + 2] * dt;
+      this.alpha[i] = Math.pow(this.life[i] / this.maxLife[i], 0.85);
+    }
+    this.geo.attributes.position.needsUpdate = true;
+    this.geo.attributes.aAlpha.needsUpdate = true;
+    this.geo.attributes.aColor.needsUpdate = true;
+    this.geo.attributes.aSize.needsUpdate = true;
+  }
+  clear() { for (const i of [...this.live]) { this.life[i] = 0; this.alpha[i] = 0; this.free.push(i); this.live.delete(i); } }
+}
+const sparks = new ParticlePool(900, true);
+const petals = new ParticlePool(260, false);
+const C_GOLD = [1, 0.84, 0.42], C_PINK = [1, 0.55, 0.72], C_ROSE = [0.95, 0.25, 0.45], C_WHITE = [1, 0.98, 0.94];
+
+function burstSparks(p, n, col, speed = 6, size = 0.16, life = 0.9) {
+  for (let i = 0; i < n; i++) {
+    const th = rand(0, Math.PI * 2), ph = rand(-1.2, 1.2), s = speed * rand(0.35, 1);
+    const c = Math.random() < 0.25 ? C_WHITE : col;
+    sparks.spawn(p.x, p.y, p.z, Math.cos(th) * Math.cos(ph) * s, Math.sin(ph) * s + speed * 0.25, Math.sin(th) * Math.cos(ph) * s, c[0], c[1], c[2], size * rand(0.7, 1.4), life * rand(0.6, 1.2), 5, 0.94);
+  }
+}
+function petalBurst(p, n) {
+  for (let i = 0; i < n; i++) {
+    const c = pick([[1, 0.55, 0.72], [1, 0.72, 0.82], [0.95, 0.35, 0.5]]);
+    petals.spawn(p.x + rand(-0.3, 0.3), p.y + rand(0, 0.6), p.z + rand(-0.3, 0.3), rand(-2, 2), rand(1.5, 4), rand(-1, 2), c[0], c[1], c[2], rand(0.14, 0.22), rand(0.9, 1.5), 3.2, 0.96);
+  }
+}
+
+/* ---------------- PHÁO HOA ---------------- */
+const FW_COLORS = [[1, 0.45, 0.6], [1, 0.8, 0.4], [0.7, 0.55, 1], [0.5, 0.85, 1], [1, 0.55, 0.75], [1, 1, 0.9]];
+const fireworks = {
+  on: false, t: 0, next: 0, rockets: [],
+  update(dt) {
+    if (!this.on) return;
+    this.t += dt;
+    if (this.t > this.next) {
+      this.next = this.t + rand(0.55, 1.0);
+      this.rockets.push({ x: rand(-16, 16), z: rand(-85, -45), ty: rand(15, 27), prog: 0, dur: rand(0.55, 0.8), col: pick(FW_COLORS) });
+      Sound.rocket();
+    }
+    for (let i = this.rockets.length - 1; i >= 0; i--) {
+      const r = this.rockets[i];
+      r.prog += dt / r.dur;
+      const y = r.ty * r.prog;
+      // đuôi sáng
+      for (let k = 0; k < 2; k++)
+        sparks.spawn(r.x + rand(-0.15, 0.15), y + rand(-0.1, 0.3), r.z, rand(-0.4, 0.4), rand(0.5, 1.5), rand(-0.4, 0.4), 1, 0.85, 0.5, 0.14, 0.42, 0, 0.95);
+      if (r.prog >= 1) {
+        const n = randi(90, 150);
+        for (let j = 0; j < n; j++) {
+          const th = rand(0, Math.PI * 2), ph = Math.acos(rand(-1, 1)), s = rand(2.5, 9.5);
+          const mix = Math.random() < 0.2 ? C_WHITE : r.col;
+          sparks.spawn(r.x, r.ty, r.z, Math.sin(ph) * Math.cos(th) * s, Math.cos(ph) * s, Math.sin(ph) * Math.sin(th) * s * 0.6, mix[0], mix[1], mix[2], rand(0.15, 0.3), rand(1.3, 2.1), 3.4, 0.965);
+        }
+        burstSparks(new THREE.Vector3(r.x, r.ty, r.z), 14, C_WHITE, 2.5, 0.5, 0.35);
+        Sound.boom();
+        shake = Math.max(shake, 0.12);
+        this.rockets.splice(i, 1);
+      }
+    }
+  },
+};
+
+/* ---------------- ÂM THANH (WebAudio tự synthesize) ---------------- */
+const Sound = {
+  ctx: null, master: null, mus: null, sfx: null, muted: false,
+  mode: 'run', nextBar: 0, timer: null, noiseBuf: null, barN: 0,
+  CHORDS: [
+    [261.63, 329.63, 392.0, 493.88],  // C
+    [220.0, 261.63, 329.63, 392.0],   // Am
+    [174.61, 220.0, 261.63, 349.23],  // F
+    [196.0, 246.94, 293.66, 392.0],   // G
+  ],
+  init() {
+    if (this.ctx) return;
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    this.ctx = new AC();
+    this.master = this.ctx.createGain(); this.master.gain.value = 0.9;
+    this.master.connect(this.ctx.destination);
+    this.mus = this.ctx.createGain(); this.mus.gain.value = 0.5; this.mus.connect(this.master);
+    this.sfx = this.ctx.createGain(); this.sfx.gain.value = 0.8; this.sfx.connect(this.master);
+    const len = this.ctx.sampleRate * 1;
+    this.noiseBuf = this.ctx.createBuffer(1, len, this.ctx.sampleRate);
+    const d = this.noiseBuf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+    this.nextBar = this.ctx.currentTime + 0.1;
+    this.timer = setInterval(() => this.schedule(), 160);
+  },
+  resume() { if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume(); },
+  toggleMute() {
+    this.muted = !this.muted;
+    if (this.master) this.master.gain.setTargetAtTime(this.muted ? 0 : 0.9, this.ctx.currentTime, 0.05);
+    $('#muteBtn').textContent = this.muted ? '🔇' : '🔊';
+  },
+  schedule() {
+    if (!this.ctx) return;
+    while (this.nextBar < this.ctx.currentTime + 0.5) {
+      this.playBar(this.nextBar, this.CHORDS[this.barN % 4]);
+      this.nextBar += this.mode === 'finale' ? 1.5 : 2.2;
+      this.barN++;
+    }
+  },
+  playBar(t, chord) {
+    const dur = this.mode === 'finale' ? 1.5 : 2.2;
+    // pad hợp âm
+    chord.forEach((f, i) => {
+      [0, 4].forEach((det) => {
+        const o = this.ctx.createOscillator(), g = this.ctx.createGain(), lp = this.ctx.createBiquadFilter();
+        o.type = i % 2 ? 'sine' : 'triangle'; o.frequency.value = f; o.detune.value = det;
+        lp.type = 'lowpass'; lp.frequency.value = 850;
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(0.028, t + 0.4);
+        g.gain.setValueAtTime(0.028, t + dur - 0.5);
+        g.gain.linearRampToValueAtTime(0, t + dur);
+        o.connect(lp); lp.connect(g); g.connect(this.mus);
+        o.start(t); o.stop(t + dur + 0.05);
+      });
+    });
+    // arpeggio
+    const steps = this.mode === 'finale' ? 12 : 8;
+    const pat = [0, 1, 2, 3, 2, 3, 1, 2, 0, 2, 3, 2];
+    for (let s = 0; s < steps; s++) {
+      const f = chord[pat[s % 4]] * 2;
+      this.pluck(f, t + (s * dur) / steps, 0.05, 0.22);
+    }
+    // chuông đoạn kết
+    if (this.mode === 'finale') { this.bell(chord[0] * 2, t); this.bell(chord[2] * 2, t + dur / 2); }
+  },
+  pluck(f, t = this.ctx && this.ctx.currentTime, vol = 0.16, dec = 0.2) {
+    if (!this.ctx) return;
+    const o = this.ctx.createOscillator(), g = this.ctx.createGain(), p = this.ctx.createStereoPanner ? this.ctx.createStereoPanner() : null;
+    o.type = 'triangle'; o.frequency.setValueAtTime(f, t);
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.001, t + dec);
+    o.connect(g);
+    if (p) { p.pan.value = rand(-0.4, 0.4); g.connect(p); p.connect(this.mus); } else g.connect(this.mus);
+    o.start(t); o.stop(t + dec + 0.05);
+  },
+  sparkle(f) { if (!this.ctx) return; this.pluck(f * 2, this.ctx.currentTime, 0.06, 0.12); },
+  jump() {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime, o = this.ctx.createOscillator(), g = this.ctx.createGain();
+    o.type = 'sine'; o.frequency.setValueAtTime(330, t); o.frequency.exponentialRampToValueAtTime(180, t + 0.16);
+    g.gain.setValueAtTime(0.12, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+    o.connect(g); g.connect(this.sfx); o.start(t); o.stop(t + 0.2);
+  },
+  thud() {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+    o.type = 'sine'; o.frequency.setValueAtTime(130, t); o.frequency.exponentialRampToValueAtTime(50, t + 0.22);
+    g.gain.setValueAtTime(0.32, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.26);
+    o.connect(g); g.connect(this.sfx); o.start(t); o.stop(t + 0.3);
+    this.noise(t, 0.12, 500, 0.18);
+  },
+  noise(t, dur, lpF, vol) {
+    const src = this.ctx.createBufferSource(), g = this.ctx.createGain(), lp = this.ctx.createBiquadFilter();
+    src.buffer = this.noiseBuf; src.loop = true;
+    lp.type = 'lowpass'; lp.frequency.value = lpF;
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    src.connect(lp); lp.connect(g); g.connect(this.sfx); src.start(t); src.stop(t + dur + 0.05);
+  },
+  bell(f, t = this.ctx && this.ctx.currentTime) {
+    if (!this.ctx) return;
+    const o = this.ctx.createOscillator(), m = this.ctx.createOscillator(), mg = this.ctx.createGain(), g = this.ctx.createGain();
+    o.type = 'sine'; o.frequency.value = f;
+    m.type = 'sine'; m.frequency.value = f * 2.76; mg.gain.value = f * 1.4;
+    m.connect(mg); mg.connect(o.frequency);
+    g.gain.setValueAtTime(0.11, t); g.gain.exponentialRampToValueAtTime(0.001, t + 1.3);
+    o.connect(g); g.connect(this.mus);
+    o.start(t); m.start(t); o.stop(t + 1.35); m.stop(t + 1.35);
+  },
+  boom() {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    const src = this.ctx.createBufferSource(), g = this.ctx.createGain(), lp = this.ctx.createBiquadFilter();
+    src.buffer = this.noiseBuf; src.loop = true;
+    lp.type = 'lowpass'; lp.frequency.setValueAtTime(900, t); lp.frequency.exponentialRampToValueAtTime(120, t + 0.55);
+    g.gain.setValueAtTime(0.3, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.6);
+    src.connect(lp); lp.connect(g); g.connect(this.sfx); src.start(t); src.stop(t + 0.65);
+    const o = this.ctx.createOscillator(), g2 = this.ctx.createGain();
+    o.type = 'sine'; o.frequency.setValueAtTime(75, t); o.frequency.exponentialRampToValueAtTime(38, t + 0.5);
+    g2.gain.setValueAtTime(0.25, t); g2.gain.exponentialRampToValueAtTime(0.001, t + 0.55);
+    o.connect(g2); g2.connect(this.sfx); o.start(t); o.stop(t + 0.6);
+  },
+  rocket() {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    const src = this.ctx.createBufferSource(), g = this.ctx.createGain(), hp = this.ctx.createBiquadFilter();
+    src.buffer = this.noiseBuf; src.loop = true;
+    hp.type = 'highpass'; hp.frequency.value = 1400;
+    g.gain.setValueAtTime(0.05, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.7);
+    src.connect(hp); hp.connect(g); g.connect(this.sfx); src.start(t); src.stop(t + 0.75);
+  },
+};
+
+/* ---------------- TRẠNG THÁI GAME ---------------- */
+let state = 'intro';          // intro | run | finale
+let ten = 'Em yêu';
+let distance = 0, flowers = 0, combo = 0, lastPick = -9, msgIdx = 0;
+let speedCur = 0, hitSlow = 0, invuln = 0, shake = 0;
+let nextSpawn = 55;
+let finaleT = 0, finaleLineT = null, finaleStarted = false;
+let elapsed = 0, runPhase = 0;
+
+const P = { lane: 1, x: 0, y: 0, vy: 0, grounded: true };
+
+/* ---------------- SPAWNER ---------------- */
+function spawnRow(d) {
+  const progress = d / TOTAL_DIST;
+  const zBase = -(d - distance);
+  const warm = d < 55; // khởi động nhẹ nhàng
+  const freeLanes = [0, 1, 2];
+  if (!warm) {
+    const nObs = progress < 0.12 ? (Math.random() < 0.5 ? 1 : 0) : (Math.random() < 0.42 ? 2 : 1);
+    for (let i = 0; i < nObs; i++) {
+      const it = acquire(obstacles);
+      if (!it) break;
+      const li = freeLanes.splice(randi(0, freeLanes.length - 1), 1)[0];
+      it.lane = li;
+      it.mesh.position.set(LANES[li], 0, zBase - i * rand(3, 7));
+      it.active = true; it.mesh.visible = true;
+      it.mesh.rotation.y = rand(-0.3, 0.3);
+    }
+  }
+  // bó hoa
+  const place = (it, x, y, z) => {
+    it.baseY = y;
+    it.mesh.position.set(x, y, z);
+    it.active = true; it.mesh.visible = true;
+  };
+  const r = Math.random();
+  if (warm || r < 0.42) {
+    // một hàng thẳng ở làn tự do
+    const li = pick(freeLanes.length ? freeLanes : [randi(0, 2)]);
+    const n = randi(4, 6);
+    for (let i = 0; i < n; i++) {
+      const it = acquire(bouquets);
+      if (!it) break;
+      place(it, LANES[li], 1.1, zBase - i * 2.1);
+    }
+  } else if (r < 0.75) {
+    // cung nhảy qua chướng ngại (thưởng cho người dám nhảy)
+    const obst = obstacles.find((o) => o.active && o.lane !== undefined && Math.abs(o.mesh.position.z - zBase) < 9);
+    if (obst) {
+      const zs = [5.5, 3.5, 1.5, -0.5, -2.5], ys = [1.05, 1.75, 2.15, 1.75, 1.05];
+      zs.forEach((dz, i) => {
+        const it = acquire(bouquets);
+        if (!it) return;
+        place(it, LANES[obst.lane], ys[i], obst.mesh.position.z + dz);
+      });
+    } else {
+      const li = pick(freeLanes.length ? freeLanes : [1]);
+      for (let i = 0; i < 4; i++) {
+        const it = acquire(bouquets);
+        if (!it) break;
+        place(it, LANES[li], 1.1, zBase - i * 2.1);
+      }
+    }
+  } else {
+    // zic-zac giữa các làn
+    let li = randi(0, 2);
+    for (let g = 0; g < 3; g++) {
+      for (let i = 0; i < 2; i++) {
+        const it = acquire(bouquets);
+        if (!it) return;
+        place(it, LANES[li], 1.1, zBase - g * 5 - i * 2.1);
+      }
+      li = clamp(li + (Math.random() < 0.5 ? -1 : 1), 0, 2);
+    }
+  }
+}
+
+/* ---------------- UI HELPERS ---------------- */
+function showMsg(text) {
+  const el = $('#msg');
+  el.textContent = text;
+  el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
+}
+const floatyPool = [];
+function floatText(text) {
+  let el = floatyPool.find((e) => !e.busy);
+  if (!el) {
+    const div = document.createElement('div');
+    $('#fx').appendChild(div);
+    el = { div, busy: false }; floatyPool.push(el);
+    div.addEventListener('animationend', () => { div.style.display = 'none'; el.busy = false; });
+  }
+  el.busy = true;
+  el.div.textContent = text;
+  el.div.style.display = 'block';
+  el.div.style.left = `calc(50% + ${rand(-40, 40)}px)`;
+  el.div.style.top = `${rand(54, 62)}%`;
+  el.div.style.animation = 'none'; void el.div.offsetWidth;
+  el.div.style.animation = '';
+  el.div.classList.remove('floaty'); void el.div.offsetWidth; el.div.classList.add('floaty');
+}
+let toastTimer = null;
+function toast(text) {
+  const el = $('#toast');
+  el.textContent = text; el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
+}
+let comboTimer = null;
+function showCombo(c) {
+  const el = $('#comboBadge');
+  el.textContent = `x${c} 🔥`;
+  el.classList.add('on');
+  clearTimeout(comboTimer);
+  comboTimer = setTimeout(() => el.classList.remove('on'), 1400);
+}
+
+/* ---------------- INPUT ---------------- */
+function moveLane(d) {
+  if (state !== 'run') return;
+  P.lane = clamp(P.lane + d, 0, 2);
+}
+function jump() {
+  if (state !== 'run' || !P.grounded) return;
+  P.grounded = false; P.vy = 8.0;
+  Sound.jump();
+}
+addEventListener('keydown', (e) => {
+  if (e.repeat) return;
+  if (state === 'intro' && (e.key === 'Enter' || e.key === ' ')) { startGame(); return; }
+  switch (e.key) {
+    case 'ArrowLeft': case 'a': case 'A': moveLane(-1); break;
+    case 'ArrowRight': case 'd': case 'D': moveLane(1); break;
+    case 'ArrowUp': case 'w': case 'W': case ' ': jump(); break;
+  }
+});
+let tX = 0, tY = 0, tT = 0;
+addEventListener('touchstart', (e) => {
+  const t = e.changedTouches[0];
+  tX = t.clientX; tY = t.clientY; tT = performance.now();
+}, { passive: true });
+addEventListener('touchend', (e) => {
+  if (e.target.closest('button, input, #finale')) return;
+  if (state !== 'run') return;
+  e.preventDefault(); // tránh trình duyệt bắn thêm sự kiện chuột ảo (double input)
+  const t = e.changedTouches[0];
+  handlePoint(t.clientX, t.clientY);
+}, { passive: false });
+addEventListener('mousedown', (e) => {
+  if (e.target.closest('button, input, #finale')) return;
+  handlePoint(e.clientX, e.clientY, true);
+});
+function handlePoint(x, y, isMouse = false) {
+  if (state !== 'run') return;
+  const dx = x - tX, dy = y - tY;
+  const swiped = !isMouse && performance.now() - tT < 400 && (Math.abs(dx) > 36 || Math.abs(dy) > 36);
+  if (swiped && Math.abs(dy) > Math.abs(dx) && dy < 0) { jump(); return; }
+  if (swiped && Math.abs(dx) > Math.abs(dy)) { moveLane(dx > 0 ? 1 : -1); return; }
+  const w = innerWidth;
+  if (x < w * 0.33) moveLane(-1);
+  else if (x > w * 0.67) moveLane(1);
+  else jump();
+}
+addEventListener('contextmenu', (e) => e.preventDefault());
+
+/* ---------------- TRỜI / ÁNH SÁNG THEO TIẾN ĐỘ ---------------- */
+const _c1 = new THREE.Color(), _c2 = new THREE.Color();
+const SKY = {
+  dayTop: new THREE.Color(0x4b4e8f), nightTop: new THREE.Color(0x060a1e),
+  dayBot: new THREE.Color(0xff9d70), nightBot: new THREE.Color(0x101b3f),
+  dayFog: new THREE.Color(0xf09a72), nightFog: new THREE.Color(0x0c122e),
+  dayHemiS: new THREE.Color(0xffd9b0), nightHemiS: new THREE.Color(0x8fa3d9),
+  dayHemiG: new THREE.Color(0x6b5a4a), nightHemiG: new THREE.Color(0x1a2030),
+  dayDir: new THREE.Color(0xffbe8a), nightDir: new THREE.Color(0xbcd0ff),
+};
+function updateSky(k, dt) {
+  skyMat.uniforms.cTop.value.lerpColors(SKY.dayTop, SKY.nightTop, k);
+  skyMat.uniforms.cBot.value.lerpColors(SKY.dayBot, SKY.nightBot, k);
+  scene.fog.color.lerpColors(SKY.dayFog, SKY.nightFog, k);
+  hemi.color.lerpColors(SKY.dayHemiS, SKY.nightHemiS, k);
+  hemi.groundColor.lerpColors(SKY.dayHemiG, SKY.nightHemiG, k);
+  hemi.intensity = lerp(0.95, 0.55, k);
+  dir.color.lerpColors(SKY.dayDir, SKY.nightDir, k);
+  dir.intensity = lerp(1.5, 0.8, k);
+  sun.position.y = 28 - 42 * k;
+  sunGlow.position.y = sun.position.y;
+  sun.material.opacity = 1 - smooth(0.45, 0.75, k);
+  sunGlow.material.opacity = 0.25 * (1 - smooth(0.45, 0.75, k));
+  moon.material.opacity = smooth(0.5, 0.8, k) * 0.95;
+  moonHalo.material.opacity = smooth(0.5, 0.8, k) * 0.22;
+  stars.material.opacity = smooth(0.42, 0.85, k);
+  fireflies.pts.material.opacity = smooth(0.5, 0.8, k) * (0.75 + 0.25 * Math.sin(elapsed * 2.6));
+  MAT.lantern.emissiveIntensity = smooth(0.42, 0.68, k) * 1.7;
+  // đom đóm bay
+  const pa = fireflies.geo.attributes.position.array;
+  for (let i = 0; i < FIRE_N; i++) {
+    const b = fireflies.base[i];
+    pa[i * 3] = b.x + Math.sin(elapsed * b.sp + b.ph) * 0.7;
+    pa[i * 3 + 1] = b.y + Math.sin(elapsed * b.sp * 1.4 + b.ph * 2) * 0.35;
+  }
+  fireflies.geo.attributes.position.needsUpdate = true;
+}
+
+/* ---------------- HUD ---------------- */
+let lastFlowers = -1, lastProg = -1;
+function updateHUD() {
+  const prog = clamp(distance / TOTAL_DIST, 0, 1);
+  if (Math.abs(prog - lastProg) > 0.003) {
+    lastProg = prog;
+    $('#progressFill').style.width = `${prog * 100}%`;
+    $('#progressFlower').style.left = `${prog * 100}%`;
+  }
+  if (flowers !== lastFlowers) {
+    lastFlowers = flowers;
+    $('#flowerNum').textContent = flowers;
+  }
+}
+
+/* ---------------- ĐOẠN KẾT ---------------- */
+function enterFinale() {
+  state = 'finale';
+  finaleT = 0; finaleStarted = false;
+  $('#hud').classList.remove('show');
+  Sound.mode = 'finale';
+  arch.visible = true;
+  showMsg(MESSAGES[6].replace('{ten}', ten));
+}
+const CAM_FIN = new THREE.Vector3(0, 2.2, 6.3);
+const LOOK_FIN = new THREE.Vector3(0, 1.9, -7);
+let typeTimer = null;
+function typeLines() {
+  const box = $('#finaleLines');
+  box.innerHTML = '';
+  $('#finale').classList.add('show');
+  let li = 0, ci = 0, cur = null;
+  const step = () => {
+    if (li >= FINALE_LINES.length) {
+      $('#finaleBtns').classList.add('show');
+      return;
+    }
+    const line = FINALE_LINES[li].text.replace('{ten}', ten);
+    if (ci === 0) {
+      cur = document.createElement('p');
+      if (FINALE_LINES[li].big) cur.className = 'big';
+      box.appendChild(cur);
+    }
+    if (ci < line.length) {
+      cur.innerHTML = line.slice(0, ++ci) + '<span class="caret">▌</span>';
+      if (ci % 3 === 0 && line[ci - 1] !== ' ') Sound.sparkle(880);
+      typeTimer = setTimeout(step, FAST ? 8 : 46);
+    } else {
+      cur.innerHTML = line;
+      li++; ci = 0;
+      typeTimer = setTimeout(step, FAST ? 120 : 480);
+    }
+  };
+  step();
+}
+
+/* ---------------- RESET ---------------- */
+function reset() {
+  clearTimeout(typeTimer);
+  distance = 0; flowers = 0; combo = 0; lastPick = -9; msgIdx = 0;
+  speedCur = 0; hitSlow = 0; invuln = 0; shake = 0; nextSpawn = 55;
+  finaleT = 0; finaleStarted = false;
+  P.lane = 1; P.x = 0; P.y = 0; P.vy = 0; P.grounded = true;
+  player.position.set(0, 0, 0); player.rotation.set(0, 0, 0);
+  obstacles.forEach(release); bouquets.forEach(release);
+  sparks.clear(); petals.clear();
+  fireworks.on = false; fireworks.rockets.length = 0;
+  arch.visible = false;
+  bigBouquet.visible = false; bigBouquet.scale.setScalar(0.01);
+  $('#finale').classList.remove('show');
+  $('#finaleBtns').classList.remove('show');
+  $('#finaleLines').innerHTML = '';
+  $('#hud').classList.add('show');
+  Sound.mode = 'run';
+  lastFlowers = -1; lastProg = -1;
+  state = 'run';
+}
+
+/* ---------------- BẮT ĐẦU ---------------- */
+let nameFails = 0;
+function startGame() {
+  const canonical = ALLOWED_NAMES[normName($('#nameInput').value)];
+  if (!canonical) {
+    nameFails++;
+    const input = $('#nameInput'), card = document.querySelector('.card');
+    input.classList.add('err');
+    card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake');
+    $('#nameErr').textContent = nameFails >= 3
+      ? 'Gợi ý nè: "Mỹ" hoặc "Kitty" đó 🙈'
+      : 'Hơ… vườn hoa này không dành cho tên này rồi 😌';
+    return;
+  }
+  ten = canonical;
+  try { localStorage.setItem('vuonhoa.ten', ten); } catch (e) {}
+  Sound.init(); Sound.resume();
+  $('#intro').classList.add('hide');
+  $('#hud').classList.add('show');
+  state = 'run';
+}
+$('#startBtn').addEventListener('click', startGame);
+$('#nameInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') startGame(); e.stopPropagation(); });
+$('#nameInput').addEventListener('input', () => {
+  $('#nameInput').classList.remove('err');
+  $('#nameErr').textContent = '';
+});
+try { $('#nameInput').value = localStorage.getItem('vuonhoa.ten') || ''; } catch (e) {}
+$('#muteBtn').addEventListener('click', () => { Sound.init(); Sound.resume(); Sound.toggleMute(); });
+$('#replayBtn').addEventListener('click', reset);
+$('#shareBtn').addEventListener('click', async () => {
+  const text = `🌸 Chúc mừng ngày Phụ nữ Việt Nam 20/10, ${ten}! ❤️\nCảm ơn em vì tất cả. Mong mọi điều em ước đều nở hoa.\n— Một vườn hoa vừa được hái dành riêng cho em 🌹`;
+  if (navigator.share) {
+    try { await navigator.share({ title: 'Vườn Hoa 20/10 🌸', text }); } catch (e) {}
+  } else if (navigator.clipboard) {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast('💌 Đã copy lời chúc — dán gửi cho người ấy nhé!');
+    } catch (e) { toast(text); }
+  } else toast(text);
+});
+
+// cánh hoa CSS ở màn mở đầu
+{
+  const wrap = $('#petals');
+  for (let i = 0; i < 14; i++) {
+    const p = document.createElement('div');
+    p.className = 'petal';
+    p.textContent = pick(['🌸', '🌹', '🌺', '🌷']);
+    p.style.left = `${rand(2, 96)}%`;
+    p.style.fontSize = `${rand(13, 24)}px`;
+    p.style.animationDuration = `${rand(7, 14)}s`;
+    p.style.animationDelay = `${rand(0, 10)}s`;
+    wrap.appendChild(p);
+  }
+}
+
+/* ---------------- VÒNG LẶP CHÍNH ---------------- */
+const clock = new THREE.Clock();
+const _v = new THREE.Vector3();
+
+function gameUpdate(dt) {
+  const progress = clamp(distance / TOTAL_DIST, 0, 1);
+
+  // tốc độ
+  let base = lerp(11, 14.5, progress);
+  let factor = 1;
+  if (hitSlow > 0) { hitSlow -= dt; factor = 0.45; }
+  if (state === 'finale') {
+    finaleT += dt;
+    factor = Math.max(0, 1 - finaleT / 1.9);
+    if (finaleT > 1.2 && !bigBouquet.visible) {
+      bigBouquet.visible = true;
+      burstSparks(bigBouquet.position, 26, C_PINK, 4, 0.2, 1);
+      Sound.bell(784);
+    }
+    if (finaleT > 1.6 && !fireworks.on) fireworks.on = true;
+    if (finaleT > 3.9 && !finaleStarted) { finaleStarted = true; typeLines(); }
+    // xoay người về phía camera
+    player.rotation.y = lerp(player.rotation.y, 3.0, dt * 2.2);
+  }
+  speedCur += (base - speedCur) * dt * 2.5;
+  const spd = state === 'intro' ? 2.2 : speedCur * factor;
+  distance += spd * dt;
+
+  // cuộn thế giới
+  chunkA.position.z += spd * dt;
+  chunkB.position.z += spd * dt;
+  if (chunkA.position.z >= CHUNK_LEN) chunkA.position.z -= CHUNK_LEN * 2;
+  if (chunkB.position.z >= CHUNK_LEN) chunkB.position.z -= CHUNK_LEN * 2;
+
+  // sinh vật phẩm / chướng ngại
+  if (state === 'run') {
+    while (distance + SPAWN_AHEAD >= nextSpawn) {
+      spawnRow(nextSpawn);
+      nextSpawn += lerp(17, 11, progress);
+    }
+  }
+
+  // nhân vật
+  const targetX = LANES[P.lane];
+  P.x += (targetX - P.x) * Math.min(1, dt * 12);
+  if (!P.grounded) {
+    P.vy -= 22 * dt; P.y += P.vy * dt;
+    if (P.y <= 0) { P.y = 0; P.vy = 0; P.grounded = true; }
+  }
+  player.position.set(P.x, P.y, 0);
+  player.rotation.z = (targetX - P.x) * -0.09;
+  runPhase += dt * (4 + spd * 1.05);
+  const amp = clamp(spd / 12, 0.15, 1) * 0.95;
+  if (P.grounded) {
+    legL.rotation.x = Math.sin(runPhase) * amp;
+    legR.rotation.x = -Math.sin(runPhase) * amp;
+    armL.rotation.x = -Math.sin(runPhase) * amp * 0.9;
+    armR.rotation.x = Math.sin(runPhase) * amp * 0.9;
+    rig.position.y = Math.abs(Math.sin(runPhase)) * 0.07 * amp;
+    rig.rotation.x = 0.1 * amp;
+  } else {
+    legL.rotation.x = lerp(legL.rotation.x, -0.6, dt * 8);
+    legR.rotation.x = lerp(legR.rotation.x, 0.35, dt * 8);
+    armL.rotation.x = lerp(armL.rotation.x, -2.4, dt * 10); // giơ tay lên khi nhảy 🎉
+    armR.rotation.x = lerp(armR.rotation.x, -2.4, dt * 10);
+  }
+  blob.position.set(P.x, 0.04, 0);
+  const bscale = Math.max(0.25, 1 - P.y * 0.5);
+  blob.scale.setScalar(bscale);
+  blob.material.opacity = 0.35 * bscale;
+  if (invuln > 0) {
+    invuln -= dt;
+    rig.visible = Math.floor(invuln * 12) % 2 === 0;
+  } else rig.visible = true;
+
+  // cập nhật đối tượng + va chạm
+  for (const it of obstacles) {
+    if (!it.active) continue;
+    it.mesh.position.z += spd * dt;
+    if (it.mesh.position.z > DESPAWN_Z) { release(it); continue; }
+    if (state !== 'run' || invuln > 0) continue;
+    const dz = it.mesh.position.z;
+    if (Math.abs(dz) < it.halfD + 0.5 && Math.abs(P.x - it.mesh.position.x) < it.halfW + 0.34 && P.y < it.clearY) {
+      invuln = 1.5; hitSlow = 1.0; shake = 0.55; combo = 0;
+      const lose = Math.min(4, flowers);
+      flowers -= lose;
+      petalBurst(new THREE.Vector3(P.x, 1.2, 0), 8 + lose * 3);
+      Sound.thud();
+      $('#flash').classList.add('on');
+      setTimeout(() => $('#flash').classList.remove('on'), 150);
+    }
+  }
+  for (const it of bouquets) {
+    if (!it.active) continue;
+    it.mesh.position.z += spd * dt;
+    it.mesh.rotation.y += dt * 2.4;
+    it.mesh.position.y = (it.baseY ?? 1.1) + Math.sin(elapsed * 3 + it.mesh.position.x) * 0.08;
+    if (it.mesh.position.z > DESPAWN_Z) { release(it); continue; }
+    if (state !== 'run') continue;
+    if (Math.abs(it.mesh.position.z) < 1.3 && Math.abs(P.x - it.mesh.position.x) < 1.0) {
+      release(it);
+      flowers++;
+      combo = elapsed - lastPick < 2.2 ? combo + 1 : 1;
+      lastPick = elapsed;
+      if (combo >= 2) { showCombo(combo); floatText(`+1 🌹 x${combo}`); }
+      else floatText('+1 🌹');
+      burstSparks(it.mesh.position, 14, C_PINK, 3.5, 0.15, 0.7);
+      Sound.pluck(392 * Math.pow(1.059, Math.min(combo, 12)));
+      Sound.sparkle(880);
+    }
+  }
+
+  // mốc lời chúc
+  if (state === 'run' && msgIdx < MILESTONES.length && progress >= MILESTONES[msgIdx]) {
+    showMsg(MESSAGES[msgIdx].replace('{ten}', ten));
+    Sound.bell(pick([659.25, 783.99, 587.33]));
+    msgIdx++;
+  }
+
+  if (state === 'run' && distance >= TOTAL_DIST) enterFinale();
+
+  updateHUD();
+}
+
+function frame() {
+  requestAnimationFrame(frame);
+  const dt = Math.min(clock.getDelta(), 0.05);
+  frameDt = dt;
+  elapsed += dt;
+
+  if (state === 'intro') {
+    // chế độ attract: thế giới cuộn chậm, camera lượn
+    chunkA.position.z += 2.2 * dt;
+    chunkB.position.z += 2.2 * dt;
+    if (chunkA.position.z >= CHUNK_LEN) chunkA.position.z -= CHUNK_LEN * 2;
+    if (chunkB.position.z >= CHUNK_LEN) chunkB.position.z -= CHUNK_LEN * 2;
+    runPhase += dt * 5;
+    legL.rotation.x = Math.sin(runPhase) * 0.2;
+    legR.rotation.x = -Math.sin(runPhase) * 0.2;
+    armL.rotation.x = -Math.sin(runPhase) * 0.2;
+    armR.rotation.x = Math.sin(runPhase) * 0.2;
+    rig.position.y = Math.sin(runPhase * 0.5) * 0.02;
+  } else {
+    gameUpdate(dt);
+  }
+
+  // camera
+  if (state === 'finale') {
+    const t = smooth(0, 1, clamp(finaleT / 2.6, 0, 1));
+    camera.position.lerpVectors(CAM_BASE, CAM_FIN, t);
+    _v.lerpVectors(CAM_LOOK, LOOK_FIN, t);
+    camera.lookAt(_v);
+    bigBouquet.rotation.y += dt * 0.8;
+    const bs = bigBouquet.visible ? 4.4 * Math.min(1, Math.max(0.01, (finaleT - 1.2) / 0.9)) : 0.01;
+    bigBouquet.scale.setScalar(Math.max(0.01, bs));
+    bigBouquet.position.y = 1.7 + Math.sin(elapsed * 1.4) * 0.12;
+    if (fireworks.on && Math.random() < dt * 6) {
+      burstSparks(_v.set(rand(-1, 1), rand(2.4, 3), -4.6), 2, C_GOLD, 1.2, 0.12, 0.5);
+    }
+  } else {
+    camera.position.set(
+      CAM_BASE.x + player.position.x * 0.5 + Math.sin(elapsed * 0.4) * 0.1,
+      CAM_BASE.y,
+      CAM_BASE.z,
+    );
+    if (state === 'intro') {
+      camera.position.x = Math.sin(elapsed * 0.3) * 1.8;
+      camera.lookAt(0, 1.6, -12);
+    } else {
+      camera.lookAt(player.position.x * 0.6, 1.5, -8);
+    }
+  }
+  if (shake > 0) {
+    shake *= Math.exp(-5 * dt);
+    camera.position.x += rand(-1, 1) * shake * 0.3;
+    camera.position.y += rand(-1, 1) * shake * 0.25;
+  }
+
+  // trời & hạt
+  const prog = state === 'intro' ? 0.06 : clamp(distance / TOTAL_DIST, 0, 1);
+  updateSky(prog, dt);
+  sparks.update(dt);
+  petals.update(dt);
+  fireworks.update(dt);
+
+  renderer.render(scene, camera);
+}
+
+addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+
+// debug API (dùng kiểm thử: ?fast + window.__dbg())
+window.__dbg = () => {
+  const v = new THREE.Vector3(P.x, 1.0 + P.y, 0).project(camera);
+  return {
+    state, distance: Math.round(distance), flowers, rotY: +player.rotation.y.toFixed(2),
+    finaleT: +finaleT.toFixed(1), py: +P.y.toFixed(2), px: +P.x.toFixed(2),
+    cam: [camera.position.x, camera.position.y, camera.position.z].map((x) => +x.toFixed(1)),
+    playerScreen: [Math.round((v.x * 0.5 + 0.5) * innerWidth), Math.round((-v.y * 0.5 + 0.5) * innerHeight)],
+    quat: camera.quaternion.toArray().map((x) => +x.toFixed(3)),
+    fov: camera.fov, aspect: +camera.aspect.toFixed(3), vw: innerWidth, vh: innerHeight,
+    fps: +(1 / Math.max(0.001, frameDt)).toFixed(0),
+  };
+};
+let frameDt = 0.016;
+
+frame();
+</script>
+</body>
+</html>
